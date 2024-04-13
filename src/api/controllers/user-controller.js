@@ -1,4 +1,4 @@
-import {addUser, findUserById, listAllUsers, modifyUser, removeUser} from "../models/user-model.js";
+import {addUser, findUserById, listAllUsers, findCatsByUserId, modifyUser, removeUser} from "../models/user-model.js";
 
 const getUser = (req, res) => {
   res.json(listAllUsers());
@@ -8,6 +8,15 @@ const getUserById = (req, res) => {
   const user = findUserById(req.params.id);
   if (user) {
     res.json(user);
+  } else {
+    res.sendStatus(404);
+  }
+}
+
+const getUserCats = (req, res) => {
+  const cats = findCatsByUserId(req.params.id);
+  if (cats) {
+    res.json(cats);
   } else {
     res.sendStatus(404);
   }
@@ -43,4 +52,4 @@ const deleteUser = (req, res) => {
   res.sendStatus(200);
 }
 
-export {getUser, getUserById, postUser, putUser, deleteUser};
+export {getUser, getUserById, getUserCats, postUser, putUser, deleteUser};
