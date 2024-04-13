@@ -26,10 +26,10 @@ const findCatById = (id) => {
   return catItems.find((item) => item.cat_id == id);
 };
 
-const addCat = (cat) => {
-  const {cat_name, weight, owner, filename, birthdate} = cat;
+const addCat = (cat, file) => {
+  const {cat_name, weight, owner, birthdate} = cat;
   const newId = catItems[0].cat_id + 1;
-  catItems.unshift({cat_id: newId, cat_name, weight, owner, filename, birthdate});
+  catItems.unshift({cat_id: newId, cat_name, weight, owner, filename: file.filename, filepath: file.filename, birthdate});
   return {cat_id: newId};
 };
 
