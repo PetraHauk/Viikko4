@@ -1,4 +1,4 @@
-import {addCat, findCatById, listAllCats} from "../models/cat-model.js";
+import {addCat, findCatById, listAllCats, modifyCat, removeCat} from "../models/cat-model.js";
 
 const getCat = (req, res) => {
   res.json(listAllCats());
@@ -24,12 +24,22 @@ const postCat = (req, res) => {
 };
 
 const putCat = (req, res) => {
-  // not implemented in this example, this is future homework
+  const result = modifyCat(req.body, req.params.id, res.locals.user);
+  if (!result) {
+    res.sendStatus(400);
+    return;
+  }
+  console.log(result);
   res.sendStatus(200);
 };
 
 const deleteCat = (req, res) => {
-  // not implemented in this example, this is future homework
+  const result = removeCat(req.params.id, res.locals.user);
+  if (!result) {
+    res.sendStatus(400);
+    return;
+  }
+  console.log(result);
   res.sendStatus(200);
 };
 

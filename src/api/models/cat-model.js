@@ -33,4 +33,22 @@ const addCat = (cat) => {
   return {cat_id: newId};
 };
 
-export {listAllCats, findCatById, addCat};
+const modifyCat = (cat, id) => {
+  const index = catItems.findIndex((item) => item.cat_id == id);
+  if (index !== -1) {
+    catItems[index] = {...cat, cat_id: id};
+    return {message: 'Cat item updated.'};
+  }
+  return null;
+}
+
+const removeCat = (id) => {
+  const index = catItems.findIndex((item) => item.cat_id == id);
+  if (index !== -1) {
+    catItems.splice(index, 1);
+    return {message: 'Cat item deleted.'};
+  }
+  return false;
+}
+
+export {listAllCats, findCatById, addCat, modifyCat, removeCat};
