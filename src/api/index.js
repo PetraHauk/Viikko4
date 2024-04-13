@@ -7,5 +7,6 @@ const router = express.Router();
 // bind base url for all cat routes to catRouter
 router.use('/cats', catRouter);
 router.use('/users', userRouter);
+router.use('/auth', authRouter);
 
 export default router;

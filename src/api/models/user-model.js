@@ -13,6 +13,17 @@ const findUserById = async (id) => {
   return rows[0];
 }
 
+const getUserByUsername = async (username) => {
+  const sql = `SELECT *
+              FROM wsk_users
+              WHERE username = ?`;
+  const [rows] = await promisePool.execute(sql, [username]);
+  if (rows.length === 0) {
+    return false;
+  }
+  return rows[0];
+};
+
 const findCatsByUserId = async (id) => {
   const [rows] = await promisePool.execute('SELECT * FROM cats WHERE owner = ?', [id]);
   if (rows.length === 0) {
@@ -51,4 +62,4 @@ const removeUser = async (id) => {
   return {message: 'User item deleted.'};
 }
 
-export {listAllUsers, findUserById, findCatsByUserId, addUser, modifyUser, removeUser};
+export {listAllUsers, findUserById, getUserByUsername, findCatsByUserId, addUser, modifyUser, removeUser};
