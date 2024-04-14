@@ -1,5 +1,6 @@
 import express from 'express';
 import api from './api/index.js';
+import {notFoundHanlder, errorHandler} from "./middlewares.js";
 
 const app = express();
 
@@ -9,6 +10,9 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 app.use('/api/v1', api);
+
+app.use(notFoundHanlder);
+app.use(errorHandler);
 
 app.get('/', (req, res) => {
     res.send('Welcome to my REST API!');
