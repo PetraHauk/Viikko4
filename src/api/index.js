@@ -1,6 +1,7 @@
 import express from 'express';
 import catRouter from './routers/cat-router.js';
 import userRouter from './routers/user-router.js';
+import authRouter from './routers/auth-router.js';
 
 const router = express.Router();
 
