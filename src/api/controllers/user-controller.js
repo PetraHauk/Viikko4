@@ -1,12 +1,12 @@
 import bcrypt from 'bcrypt';
 import {addUser, findUserById, listAllUsers, findCatsByUserId, modifyUser, removeUser} from "../models/user-model.js";
 
-const getUser = (req, res) => {
-  res.json(listAllUsers());
+const getUser = async (req, res) => {
+  res.json(await listAllUsers());
 }
 
-const getUserById = (req, res) => {
-  const user = findUserById(req.params.id);
+const getUserById = async (req, res) => {
+  const user = await findUserById(req.params.id);
   if (user) {
     res.json(user);
   } else {
@@ -14,8 +14,8 @@ const getUserById = (req, res) => {
   }
 }
 
-const getUserCats = (req, res) => {
-  const cats = findCatsByUserId(req.params.id);
+const getUserCats = async (req, res) => {
+  const cats = await findCatsByUserId(req.params.id);
   if (cats) {
     res.json(cats);
   } else {
@@ -23,35 +23,84 @@ const getUserCats = (req, res) => {
   }
 }
 
-const postUser = (req, res) => {
-  req.body.password = bcrypt.hashSync(req.body.password, 10);
-  const result = addUser(req.body);
-  if (result.user_id) {
-    res.status(201);
-    res.json({message: 'New user added.', result});
-  } else {
-    res.sendStatus(400);
+const postUser = async (req, res) => {
+  const currentUser = res.locals.user;
+  if (!currentUser) {
+    res.sendStatus(401);
+    return;
+  }
+  try {
+    let user;
+    if (currentUser.role === 'admin') {
+      const {name, username, email, role, password} = req.body;
+      const hashedPassword = bcrypt.hashSync(password, 10);
+      user = {name, username, email, role, password: hashedPassword};
+    } else {
+      const {name, username, email, password} = req.body;
+      const hashedPassword = bcrypt.hashSync(password, 10);
+      user = {name, username, email, role: 'user', password: hashedPassword};
+    }
+    const result = await addUser(user);
+    if (result.user_id) {
+      res.status(201);
+      res.json({message: 'New user added.', result});
+      return;
+    }
+  } catch (error) {
+    console.error('Error adding user', error);
+    res.sendStatus(500);
   }
 }
 
-const putUser = (req, res) => {
-  const result = modifyUser(req.body, req.params.id);
-  if (!result) {
-    res.sendStatus(400);
+const putUser = async (req, res) => {
+  const userID = res.params.id;
+  const updateData = req.body;
+  const authUser = res.locals.user;
+  if (!authUser) {
+    res.sendStatus(401);
     return;
   }
-  console.log(result);
-  res.sendStatus(200);
+
+  try {
+    if (authUser.user.id !== userID && authUser.role !== 'admin') {
+    const result = await modifyUser(updateData, userID, authUser);
+    if (!result) {
+      res.sendStatus(400);
+      return;
+    }
+    console.log(result);
+    res.sendStatus(200);
+    return;
+    }
+    res.sendStatus(403);
+  } catch (error) {
+    console.error('Error updating user', error);
+    res.sendStatus(500);
+  }
 }
 
-const deleteUser = (req, res) => {
-  const result = removeUser(req.params.id);
-  if (!result) {
-    res.sendStatus(400);
+const deleteUser = async (req, res) => {
+  const userID = res.params.id;
+  const authUser = res.locals.user;
+  if (!authUser) {
+    res.sendStatus(401);
     return;
   }
-  console.log(result);
-  res.sendStatus(200);
+  try {
+    if (authUser.user.id === userID || authUser.role === 'admin') {
+      const result = await removeUser(userID, authUser);
+      if (!result) {
+        res.sendStatus(400);
+        return;
+      }
+      res.status(200);
+      return;
+    }
+    res.sendStatus(403);
+  } catch (error) {
+    console.error('Error deleting user', error);
+    res.sendStatus(500);
+  }
 }
 
 export {getUser, getUserById, getUserCats, postUser, putUser, deleteUser};

@@ -44,22 +44,28 @@ const addUser = async (user) => {
   return {user_id: rows[0].insertId};
 }
 
-const modifyUser = async (user, id) => {
-  const sql = promisePool.format(`UPDATE users SET ? WHERE user_id = ?`, [user, id]);
-  const rows = await promisePool.execute(sql);
-  if (rows[0].affectedRows === 0) {
-    return false;
+const modifyUser = async (user, id, authUser) => {
+  if (authUser.role === 'admin' && authUser.user_id !== id) {
+    const sql = promisePool.format(`UPDATE users SET ? WHERE user_id = ?`, [user, id]);
+    const rows = await promisePool.execute(sql);
+    if (rows[0].affectedRows === 0) {
+      return false;
+    }
+    return {message: 'User item updated.'};
   }
-  return {message: 'User item updated.'};
 }
 
-const removeUser = async (id) => {
-  const [userRows] = await promisePool.execute('DELETE FROM users WHERE user_id = ?', [id]);
-  if (userRows.affectedRows === 0) {
-    return false;
+const removeUser = async (id, authtUser) => {
+  if (authtUser.role === 'admin' && authtUser.user_id !== id) {
+    const [userRows] = await promisePool.execute('DELETE FROM users WHERE user_id = ?', [id]);
+    if (userRows.affectedRows === 0) {
+      return false;
+    }
+    const [catRows] = await promisePool.execute('DELETE FROM cart WHERE user_id = ?', [id]);
+    return {message: 'User item deleted.'};
+  } else {
+    return 'Unauthorized';
   }
-  const [cartRows] = await promisePool.execute('DELETE FROM cart WHERE user_id = ?', [id]);
-  return {message: 'User item deleted.'};
 }
 
 export {listAllUsers, findUserById, getUserByUsername, findCatsByUserId, addUser, modifyUser, removeUser};
