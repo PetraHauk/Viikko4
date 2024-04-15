@@ -7,7 +7,7 @@ import {
   putCat,
   deleteCat,
 } from '../controllers/cat-controller.js';
-import {upload, validationErrors} from '../../middlewares.js'
+import {upload, authenticateToken,validationErrors} from '../../middlewares.js'
 
 const catRouter = express.Router();
 
@@ -19,7 +19,7 @@ const validateCat = [
 
 catRouter
   .route('/')
-  .get(getCats)
+  .get(getCat)
   .post(
     authenticateToken,
     validateCat,

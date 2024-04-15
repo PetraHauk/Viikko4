@@ -7,6 +7,7 @@ import {
   putUser,
   deleteUser, getUserCats,
 } from "../controllers/user-controller.js";
+import {validationErrors} from '../../middlewares.js'
 
 const userRouter = express.Router();
 
@@ -17,7 +18,7 @@ const validateUser = [
 ];
 
 userRouter.route('/')
-  .get(getUsers)
+  .get(getUser)
   .post(
     validateUser,
     validationErrors,

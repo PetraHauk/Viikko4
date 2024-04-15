@@ -1,12 +1,12 @@
 import promisePool from '../../utils/database.js';
 
 const listAllUsers = async () => {
-  const [rows] = await promisePool.query('SELECT * FROM users');
+  const [rows] = await promisePool.query('SELECT * FROM wsk_users');
   return rows;
 }
 
 const findUserById = async (id) => {
-  const [rows] = await promisePool.execute('SELECT * FROM users WHERE user_id = ?', [id]);
+  const [rows] = await promisePool.execute('SELECT * FROM wsk_users WHERE user_id = ?', [id]);
   if (rows.length === 0) {
     return false;
   }
@@ -25,7 +25,7 @@ const getUserByUsername = async (username) => {
 };
 
 const findCatsByUserId = async (id) => {
-  const [rows] = await promisePool.execute('SELECT * FROM cats WHERE owner = ?', [id]);
+  const [rows] = await promisePool.execute('SELECT * FROM wsk_cats WHERE owner = ?', [id]);
   if (rows.length === 0) {
     return false;
   }
@@ -34,7 +34,7 @@ const findCatsByUserId = async (id) => {
 
 const addUser = async (user) => {
   const {name, username, email, role, password} = user;
-  const sql = `INSERT INTO users (name, username, email, role, password)
+  const sql = `INSERT INTO wsk_users (name, username, email, role, password)
                VALUES (?, ?, ?, ?, ?)`;
   const params = [name, username, email, role, password];
   const rows = await promisePool.execute(sql, params);
@@ -46,7 +46,7 @@ const addUser = async (user) => {
 
 const modifyUser = async (user, id, authUser) => {
   if (authUser.role === 'admin' && authUser.user_id !== id) {
-    const sql = promisePool.format(`UPDATE users SET ? WHERE user_id = ?`, [user, id]);
+    const sql = promisePool.format(`UPDATE wsk_users SET ? WHERE user_id = ?`, [user, id]);
     const rows = await promisePool.execute(sql);
     if (rows[0].affectedRows === 0) {
       return false;
@@ -57,11 +57,11 @@ const modifyUser = async (user, id, authUser) => {
 
 const removeUser = async (id, authtUser) => {
   if (authtUser.role === 'admin' && authtUser.user_id !== id) {
-    const [userRows] = await promisePool.execute('DELETE FROM users WHERE user_id = ?', [id]);
+    const [userRows] = await promisePool.execute('DELETE FROM wsk_users WHERE user_id = ?', [id]);
     if (userRows.affectedRows === 0) {
       return false;
     }
-    const [catRows] = await promisePool.execute('DELETE FROM cart WHERE user_id = ?', [id]);
+    const [catRows] = await promisePool.execute('DELETE FROM wsk_cat WHERE user_id = ?', [id]);
     return {message: 'User item deleted.'};
   } else {
     return 'Unauthorized';
